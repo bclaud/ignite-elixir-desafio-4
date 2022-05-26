@@ -61,4 +61,29 @@ defmodule Flightex.Bookings.AgentTest do
       assert response == expected_response
     end
   end
+
+  describe "get_all/0" do
+    setup %{} do
+      BookingsAgent.start_link(%{})
+
+      :ok
+    end
+
+    test "Return an empty map if there is no bookings on the agent" do
+      assert BookingsAgent.get_all() == %{}
+    end
+
+    test "Return a map with all saved bookings" do
+      id = UUID.uuid4()
+      booking = build(:booking, id: id)
+      random_id_booking = build(:booking, id: UUID.uuid4())
+
+      BookingsAgent.save(booking)
+      BookingsAgent.save(random_id_booking)
+      response = BookingsAgent.get_all()
+
+      assert %{^id => ^booking} = response
+      assert Enum.count(response) == 2
+    end
+  end
 end
